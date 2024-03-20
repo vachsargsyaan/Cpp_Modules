@@ -1,0 +1,83 @@
+#include "phonebook.hpp"
+
+bool	phonebook::correct_phone_number(std::string _phone_number_)
+{
+	size_t i = 0;
+
+	while (i < _phone_number_.length())
+	{
+		if (!std::isdigit(_phone_number_[i]))
+			return true;
+		i++;
+	}
+	return false;
+}
+
+bool	phonebook::only_space(std::string _space_)
+{
+	size_t i = 0;
+
+	while (i < _space_.length())
+	{
+		if (_space_[i] != ' ')
+			return false;
+		i++;
+	}
+	return true;
+}
+
+void	phonebook::pars_set_dot(std::string &s1, std::string s2)
+{
+	if (s2.length() > 10)
+		s1 = (s2.substr(0, 9) + '.');
+	else
+		s1 = s2;
+}
+
+void	phonebook::search(int count)
+{
+	int			i = 0;
+	int 		index = 0;
+	std::string	tmp;
+	std::string	output;
+	if (count == 0)
+	{
+		std::cout << "You don't have contact\n";
+		return ;
+	}
+
+	std::cout << "|  index  | First name | Last name | Nickname |\n";
+	for (int j = 0; j < count; ++j)
+	{
+		std::cout << " ---------- ---------- ---------- ----------" << "\n";
+		std::cout << "|" << std::setw(10) << j << "|" << std::setw(10);
+		pars_set_dot(output, contact[i].get_first_name());
+		std::cout <<  output << "|" << std::setw(10);
+		pars_set_dot(output, contact[i].get_last_name());
+		std::cout <<  output << "|" << std::setw(10);
+		pars_set_dot(output, contact[i].get_nickname());
+		std::cout <<  output << "|" << "\n";
+	}
+	std::cout << " ---------- ---------- ---------- ----------" << "\n";
+	while (1)
+	{
+		std::cout << "Enter index to display information : ";
+		getline(std::cin, tmp);
+		if (std::cin.eof())
+			exit (1);
+		index = std::atoi(tmp.c_str());
+		if (index >= count || tmp.empty() || index < 0 || std::isalpha(tmp[0]))
+		{
+			std::cout << "You entered an incorrect index!!!" << "\n";
+			continue ;
+		}
+		std::cout << "\n";
+		break ;
+	}
+	std::cout << "Firs Name : " << contact[index].get_first_name() << "\n";
+	std::cout << "Last Name : " << contact[index].get_last_name() << "\n";
+	std::cout << "Nickame : " << contact[index].get_nickname() << "\n";
+	std::cout << "Phone Number : " << contact[index].get_phone_number() << "\n";
+	std::cout << "Darkest Secret : " << contact[index].get_darkest_secret() << "\n";
+	std::cout << "\n";
+}
