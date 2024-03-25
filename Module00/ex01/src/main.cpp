@@ -1,8 +1,8 @@
-#include "phonebook.hpp"
+#include "PhoneBook.hpp"
 
 int main()
 {
-	phonebook		obj;
+	PhoneBook		obj;
 	int				i;
 	int				count;
 	std::string		input;		
@@ -12,7 +12,7 @@ int main()
 	while (1)
 	{
 		std::cout << "Command ADD: Added new Contact." << "\n";
-		std::cout << "Command SEARCH: searching and showing contacts." << "\n";
+		std::cout << "Command SEARCH: searching and showing Contacts." << "\n";
 		std::cout << "Command EXIT: Closing programm." << "\n";
 		std::cout << "Input Command : ";
 		getline(std::cin, input);

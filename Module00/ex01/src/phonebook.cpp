@@ -1,6 +1,6 @@
-#include "phonebook.hpp"
+#include "PhoneBook.hpp"
 
-bool	phonebook::correct_phone_number(std::string _phone_number_)
+bool	PhoneBook::correct_phone_number(std::string _phone_number_)
 {
 	size_t i = 0;
 
@@ -13,7 +13,7 @@ bool	phonebook::correct_phone_number(std::string _phone_number_)
 	return false;
 }
 
-bool	phonebook::only_space(std::string _space_)
+bool	PhoneBook::only_space(std::string _space_)
 {
 	size_t i = 0;
 
@@ -26,7 +26,7 @@ bool	phonebook::only_space(std::string _space_)
 	return true;
 }
 
-void	phonebook::pars_set_dot(std::string &s1, std::string s2)
+void	PhoneBook::pars_set_dot(std::string &s1, std::string s2)
 {
 	if (s2.length() > 10)
 		s1 = (s2.substr(0, 9) + '.');
@@ -34,7 +34,7 @@ void	phonebook::pars_set_dot(std::string &s1, std::string s2)
 		s1 = s2;
 }
 
-void	phonebook::search(int count)
+void	PhoneBook::search(int count)
 {
 	int			i = 0;
 	int 		index = 0;
@@ -42,7 +42,7 @@ void	phonebook::search(int count)
 	std::string	output;
 	if (count == 0)
 	{
-		std::cout << "You don't have contact\n";
+		std::cout << "You don't have Contact\n";
 		return ;
 	}
 
@@ -51,11 +51,11 @@ void	phonebook::search(int count)
 	{
 		std::cout << " ---------- ---------- ---------- ----------" << "\n";
 		std::cout << "|" << std::setw(10) << j << "|" << std::setw(10);
-		pars_set_dot(output, contact[i].get_first_name());
+		pars_set_dot(output, Contact[i].get_first_name());
 		std::cout <<  output << "|" << std::setw(10);
-		pars_set_dot(output, contact[i].get_last_name());
+		pars_set_dot(output, Contact[i].get_last_name());
 		std::cout <<  output << "|" << std::setw(10);
-		pars_set_dot(output, contact[i].get_nickname());
+		pars_set_dot(output, Contact[i].get_nickname());
 		std::cout <<  output << "|" << "\n";
 	}
 	std::cout << " ---------- ---------- ---------- ----------" << "\n";
@@ -74,10 +74,10 @@ void	phonebook::search(int count)
 		std::cout << "\n";
 		break ;
 	}
-	std::cout << "Firs Name : " << contact[index].get_first_name() << "\n";
-	std::cout << "Last Name : " << contact[index].get_last_name() << "\n";
-	std::cout << "Nickame : " << contact[index].get_nickname() << "\n";
-	std::cout << "Phone Number : " << contact[index].get_phone_number() << "\n";
-	std::cout << "Darkest Secret : " << contact[index].get_darkest_secret() << "\n";
+	std::cout << "Firs Name : " << Contact[index].get_first_name() << "\n";
+	std::cout << "Last Name : " << Contact[index].get_last_name() << "\n";
+	std::cout << "Nickame : " << Contact[index].get_nickname() << "\n";
+	std::cout << "Phone Number : " << Contact[index].get_phone_number() << "\n";
+	std::cout << "Darkest Secret : " << Contact[index].get_darkest_secret() << "\n";
 	std::cout << "\n";
 }

@@ -6,18 +6,18 @@
 /*   By: vacsargs <vacsargs@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/02 19:59:51 by vacsargs          #+#    #+#             */
-/*   Updated: 2024/03/13 19:41:49 by vacsargs         ###   ########.fr       */
+/*   Updated: 2024/03/20 18:48:36 by vacsargs         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef CONTACT_HPP
-# define CONTACT_HPP
+#ifndef Contact_HPP
+# define Contact_HPP
 
 # include <iostream>
 # include <iomanip>
 # include <string>
 
-class contact
+class Contact
 {
 	public:
 		void	set_first_name(std::string first_name);

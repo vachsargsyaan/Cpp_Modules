@@ -1,6 +1,6 @@
-#include "phonebook.hpp"
+#include "PhoneBook.hpp"
 
-void	phonebook::add_first_name(int i)
+void	PhoneBook::add_first_name(int i)
 {
 	std::string	str;
 
@@ -18,11 +18,11 @@ void	phonebook::add_first_name(int i)
 			std::cout << "Not correct First Name\n";
 			continue;
 		}
-		contact[i].set_first_name(str);	
+		Contact[i].set_first_name(str);	
 		break;
 	}
 }
-void 	phonebook::add_last_name(int i)
+void 	PhoneBook::add_last_name(int i)
 {
 	std::string	str;
 
@@ -40,12 +40,12 @@ void 	phonebook::add_last_name(int i)
 			std::cout << "Not correct Last Name\n";
 			continue;
 		}
-		contact[i].set_last_name(str);	
+		Contact[i].set_last_name(str);	
 		break;
 	}
 }
 
-void	phonebook::add_phone_number(int i)
+void	PhoneBook::add_phone_number(int i)
 {
 	std::string	str;
 
@@ -63,23 +63,23 @@ void	phonebook::add_phone_number(int i)
 			std::cout << "Not correct Phone Number\n";
 			continue;
 		}
-		contact[i].set_phone_number(str);	
+		Contact[i].set_phone_number(str);	
 		break;
 	}
 }
 
-void	phonebook::add(int i)
+void	PhoneBook::add(int i)
 {
 	std::string	str;
 
-	phonebook::add_first_name(i);
-	phonebook::add_last_name(i);
-	phonebook::add_phone_number(i);
+	PhoneBook::add_first_name(i);
+	PhoneBook::add_last_name(i);
+	PhoneBook::add_phone_number(i);
 	std::cout << "Enter Nickname : ";
 	getline(std::cin, str);
-	contact[i].set_nickname(str);
+	Contact[i].set_nickname(str);
 	std::cout << "Darkest Secret : ";
 	getline(std::cin, str);
-	contact[i].set_darkest_secret(str);
+	Contact[i].set_darkest_secret(str);
 	std::cout << "Contact added successfully.\n";
 }
