@@ -1,4 +1,4 @@
-#include "PhoneBook.hpp"
+#include "phonebook.hpp"
 
 bool	PhoneBook::correct_phone_number(std::string _phone_number_)
 {
@@ -36,7 +36,6 @@ void	PhoneBook::pars_set_dot(std::string &s1, std::string s2)
 
 void	PhoneBook::search(int count)
 {
-	int			i = 0;
 	int 		index = 0;
 	std::string	tmp;
 	std::string	output;
@@ -51,11 +50,11 @@ void	PhoneBook::search(int count)
 	{
 		std::cout << " ---------- ---------- ---------- ----------" << "\n";
 		std::cout << "|" << std::setw(10) << j << "|" << std::setw(10);
-		pars_set_dot(output, Contact[i].get_first_name());
+		pars_set_dot(output, Contact[j].get_first_name());
 		std::cout <<  output << "|" << std::setw(10);
-		pars_set_dot(output, Contact[i].get_last_name());
+		pars_set_dot(output, Contact[j].get_last_name());
 		std::cout <<  output << "|" << std::setw(10);
-		pars_set_dot(output, Contact[i].get_nickname());
+		pars_set_dot(output, Contact[j].get_nickname());
 		std::cout <<  output << "|" << "\n";
 	}
 	std::cout << " ---------- ---------- ---------- ----------" << "\n";
