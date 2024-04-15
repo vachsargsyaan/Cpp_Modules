@@ -26,13 +26,9 @@ void	Harl::warning()
 
 void	Harl::print_err()
 {
-	std::cout << "Not correct command\n";
+	std::cout << "Not coorect command\n";
 	return ;
 }
-
-Harl::Harl(){}
-
-Harl::~Harl(){}
 
 void	Harl::complain(std::string level)
 {
@@ -42,5 +38,22 @@ void	Harl::complain(std::string level)
 	int i = 0;
 	while (level != arr[i] && arr[i] != "NULL")
 		++i;
-	(i != 4) ? (this->*tmp[i])() : print_err();
+	switch(i)
+	{
+		case 0:
+			(this->*tmp[0])();
+			break;
+		case 1:
+			(this->*tmp[1])();
+			break;
+		case 2:
+			(this->*tmp[2])();
+			break;
+		case 3:
+			(this->*tmp[3])();
+			break;
+		default:
+			print_err();
+			break;
+	}
 }

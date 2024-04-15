@@ -5,7 +5,7 @@ Weapon::Weapon(const std::string& attribute_type):attribute_type(attribute_type)
 
 Weapon::~Weapon(){}
 
-std::string& Weapon::getType()
+const std::string& Weapon::getType() const
 {
 	return this->attribute_type;
 }

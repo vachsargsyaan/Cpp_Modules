@@ -13,6 +13,6 @@ void HumanA::attack()
 	std::cout << this->_name << " attacks with their "<< wp.getType()<< "\n";
 }
 
-// void HumanA::setWeapon(const Weapon& _wp) {
-//     this->wp = _wp;
-// }
+void HumanA::setWeapon(const Weapon& _wp) {
+    this->wp = _wp;
+}
