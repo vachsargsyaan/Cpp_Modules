@@ -11,7 +11,6 @@ int main(int argc, char **argv)
     }
     std::ifstream	inFIle(argv[1]);
 	std::string		line;
-
     if (!inFIle)
     {
         std::cout << "cant open the file\n";
@@ -28,7 +27,7 @@ int main(int argc, char **argv)
 			line.insert(pos, argv[3]);
 			pos += strlen(argv[3]);
 		}
-		outFile << line << std::endl;
+		outFile << line << "\n";
 		pos = 0;
 	}
 	return 0;
