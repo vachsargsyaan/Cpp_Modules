@@ -1,5 +1,8 @@
 #pragma once
 
+#include <iostream>
+#include <cmath>
+
 class Fixed
 {
 	public:
@@ -9,12 +12,14 @@ class Fixed
 		Fixed(const Fixed &other);
 		~Fixed();
 	public:
-		Fixed operator=(const Fixed &other);
-		int getRawBits( void ) const;
-		void setRawBits( int const raw );
-		float	toFloat(void);
-		int		toInt(void);
+		Fixed&	operator=(const Fixed &other);
+		int		getRawBits( void ) const;
+		void	setRawBits( int const raw );
+		float	toFloat(void) const;
+		int		toInt(void) const;
 	private:
-		int fixed;
-		static const int bit;
+		int					fixed;
+		static const int	bit;
 };
+
+std::ostream& operator<<(std::ostream& os, const Fixed& obj);
