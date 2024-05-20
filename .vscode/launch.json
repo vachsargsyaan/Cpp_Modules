@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Users/vachesargsyan/Desktop/Cpp_Modules/Module02/ex03/src",
+      "program": "/Users/vachesargsyan/Desktop/Cpp_Modules/Module02/ex03/src/build/Debug/outDebug"
+    }
+  ]
+}
