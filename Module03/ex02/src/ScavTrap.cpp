@@ -9,8 +9,8 @@ ScavTrap::ScavTrap(std::string &_name_):ClapTrap(_name_)
 {
 	std::cout << "Operator ScavTrap constructor called" << std::endl;
 	this->_Hit_ = 100;
-	this->_Attack_ = 20;
 	this->_Energy_ = 50;
+	this->_Attack_ = 20;
 }
 
 ScavTrap::~ScavTrap()
