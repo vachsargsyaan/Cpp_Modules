@@ -5,9 +5,10 @@ DiamondTrap::DiamondTrap():_name_("nil")
 	std::cout << "DiamondTrap Default counstructor called ..." << std::endl;
 }
 
-DiamondTrap::DiamondTrap(const std::string &name):ClapTrap(),_name_(name)
+DiamondTrap::DiamondTrap(const std::string &name) : 
+	ClapTrap(name +  "_clap_name") , FragTrap(name + "_clap_name") , ScavTrap( name + "_clap_name") ,_name_(name)
 {
-	std::cout << "DiamondTrap Parameter counstructor called ..." << std::endl;
+	std::cout << "DiamondTrap parameterized counstructor called ..." << std::endl;
 	this->_Hit_ = 100;
 	this->_Energy_ = 50;
 	this->_Attack_ = 30;
@@ -29,9 +30,9 @@ DiamondTrap& DiamondTrap::operator =(const DiamondTrap &other)
 	if (this == &other)
 		return *this;
 	this->_name_ = other._name_;
-	this->_Hit_ = other._Hit_;
-	this->_Energy_ = other._Energy_;
-	this->_Attack_ = other._Attack_;
+	ClapTrap::operator=(other);
+	FragTrap::operator=(other);
+	ScavTrap::operator=(other);
 	return *this;
 }
 
