@@ -3,6 +3,8 @@
 
 int main()
 {
+    // Animal a;
+    // (void)a;
 	Animal **meta = new Animal*[100];
     for (int i = 0; i < 50; i++)
         meta[i] = new Cat();
