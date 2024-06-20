@@ -23,7 +23,7 @@ Character::Character(const Character &other)
 	for (int i = 0; i < 4; ++i)
 	{
 		delete this->slot[i];
-		this->slot[i] = other.slot[i];
+		this->slot[i] = other.slot[i]->clone();
 	}
 }
 
@@ -43,7 +43,7 @@ Character& Character::operator =(const Character &other)
 	for (int i = 0; i < 4; ++i)
 	{
 		delete this->slot[i];
-		this->slot[i] = other.slot[i];
+		this->slot[i] = other.slot[i]->clone();
 	}
 	return *this;
 }
