@@ -30,7 +30,7 @@ Character::Character(const Character &other)
 Character::~Character()
 {
 	std::cout << "Character Destructor called" << std::endl;
-	for (int i = 0; i < 0; ++i)
+	for (int i = 0; i < 4; ++i)
 		delete this->slot[i];
 }
 

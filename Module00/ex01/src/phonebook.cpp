@@ -62,8 +62,8 @@ void	PhoneBook::search(int count)
 	{
 		std::cout << "Enter index to display information : ";
 		getline(std::cin, tmp);
-		if (std::cin.eof())
-			exit (1);
+	
+	
 		index = std::atoi(tmp.c_str());
 		if (index >= count || tmp.empty() || index < 0 || std::isalpha(tmp[0]))
 		{
