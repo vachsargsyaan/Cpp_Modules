@@ -2,7 +2,7 @@
 #include "iter.hpp"
 
 
-int main( int, char ** )
+int main()
 {
     int intArray[] = { 1, 2, 3, 4, 5 };
 	size_t intArrayLength = sizeof(intArray) / sizeof(intArray[0]);
