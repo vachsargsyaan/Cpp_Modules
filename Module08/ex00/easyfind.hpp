@@ -1,6 +1,10 @@
 #pragma once
 
 #include <iostream>
+#include <algorithm>
+#include <vector>
+#include <iterator>
+
 
 template <typename T>
 int easyfinde(const T &array, const int num)

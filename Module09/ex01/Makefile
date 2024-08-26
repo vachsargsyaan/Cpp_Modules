@@ -1,4 +1,4 @@
-NAME	= Span
+NAME	= RPN
 
 SRC 	= $(wildcard *.cpp)
 
@@ -18,7 +18,7 @@ all: $(NAME)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(NAME): $(OBJ) $(HEADERS)
-	$(CC) $(CFLAGS) -o $(NAME) $(OBJ) 
+	$(CC) $(CFLAGS) -o $(NAME) $(OBJ)
 
 clean:
 	@rm -rf $(OBJ)
