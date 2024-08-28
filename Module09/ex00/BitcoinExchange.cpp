@@ -1,272 +1,277 @@
 #include "BitcoinExchange.hpp"
 
-std::map<std::string, double> BitcoinExchange::MAP;
-std::string BitcoinExchange::value;
-std::string BitcoinExchange::key;
-std::string err;
-char BitcoinExchange::sym;
+const std::string BitcoinExchange::DB_NAME = "data.csv";
+const std::string BitcoinExchange::DB_DATE_COL_NAME = "date";
+const std::string BitcoinExchange::DB_EXCHANGE_COL_NAME = "exchange_rate";
+const int BitcoinExchange::MONTH_MAX_DAY[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+db_map BitcoinExchange::DB_COURSES_MAP;
+const std::string BitcoinExchange::INPUT_FIRST_COL_NAME = "date";
+const std::string BitcoinExchange::INPUT_SECOND_COL_NAME = "value";
 
-BitcoinExchange::BitcoinExchange()
-{ }
+BitcoinExchange::BitcoinExchange( void ) {}
+BitcoinExchange::BitcoinExchange( const BitcoinExchange & ) {}
+BitcoinExchange::~BitcoinExchange() {}
+void BitcoinExchange::operator=( const BitcoinExchange & ) {}
 
-BitcoinExchange::BitcoinExchange(const BitcoinExchange& other)
-{ (void)other; }
+void BitcoinExchange::validateDB( void ) {
+	std::ifstream DB;
+	double tempDBValue = 0;
 
-BitcoinExchange::~BitcoinExchange()
-{ }
-BitcoinExchange& BitcoinExchange::operator= (const BitcoinExchange& other)
-{ (void)other; return *this; }
+	DB.open(BitcoinExchange::DB_NAME);
 
-void BitcoinExchange::creat_cal(std::map<int,int>& cal)
-{
-	for (int i = 1; i <= 12; ++ i)
-	{
-		if (i < 8)
-		{
-			if (i == 2)
-				cal.insert(std::make_pair(i,28));
-			else if (!(i % 2))
-				cal.insert(std::make_pair(i,30));
-			else
-				cal.insert(std::make_pair(i,31));
-		}
-		else
-		{
-			if (i % 2)
-				cal.insert(std::make_pair(i,30));
-			else
-				cal.insert(std::make_pair(i,31));
-		}
+	if (!DB)
+		throw std::runtime_error(ERR_UNAVAILABLE_DB);
+
+	std::string fileContent;
+	std::string btcCourseKey, btcCourseValue;
+	size_t commaPos;
+	bool isEmpty = true;
+
+	DB >> fileContent;
+	commaPos = fileContent.find(',');
+	while(DB.good()) {
+		if (isEmpty)
+			isEmpty = false;
+		DB >> fileContent;
+
+		commaPos = fileContent.find(',');
+
+		if (commaPos == std::string::npos)
+			throw std::runtime_error(ERR_INVALID_DB);
+
+		btcCourseKey = fileContent.substr(0, commaPos);
+		btcCourseValue = fileContent.substr(commaPos + 1, fileContent.length());
+
+		if (btcCourseKey.length() && btcCourseValue.length()
+			&& BitcoinExchange::isValidDate(btcCourseKey)
+			&& BitcoinExchange::isValidAndInBoundsNumber(btcCourseValue, true)) {
+				tempDBValue = std::strtod(btcCourseValue.c_str(), NULL);
+
+				if (tempDBValue <= std::numeric_limits<int>::max()) {
+					BitcoinExchange::DB_COURSES_MAP[btcCourseKey] = std::strtod(btcCourseValue.c_str(), NULL);
+					continue ;
+				}
+			}
+		BitcoinExchange::DB_COURSES_MAP.clear();
+		throw std::runtime_error(ERR_INVALID_DB);
 	}
+
+	if (isEmpty || BitcoinExchange::DB_COURSES_MAP.begin() == BitcoinExchange::DB_COURSES_MAP.end())
+		throw std::runtime_error(ERR_EMPTY_DB);
+}
+
+void BitcoinExchange::executeInput( char * inputFile ) {
+	const std::string fileName(inputFile);
+	std::ifstream fileReader(fileName);
+
+	if (!fileReader)
+		throw std::runtime_error(ERR_INVALID_INPUT_FILE);
+
+	std::string fileContent, date, course;
+	std::string* inputLine = NULL;
+	size_t splitSize;
+	char delimiter = '|';
+
+	std::getline(fileReader, fileContent);
+	inputLine = BitcoinExchange::split(fileContent, delimiter, splitSize);
+
+	if (splitSize != 2
+		|| BitcoinExchange::trimWhitespaces(inputLine[0]) != std::string(BitcoinExchange::INPUT_FIRST_COL_NAME)
+		|| BitcoinExchange::trimWhitespaces(inputLine[1]) != std::string(BitcoinExchange::INPUT_SECOND_COL_NAME)) {
+			delete[] inputLine;
+			throw std::runtime_error(ERR_INVALID_INPUT);
+	}
+
+	std::getline(fileReader, fileContent);
+	delete[] inputLine;
+	inputLine = NULL;
+
+	while (fileReader) {
+
+		if (!BitcoinExchange::trimWhitespaces(fileContent).length()) {
+			std::getline(fileReader, fileContent);
+			continue ;
+		}
+
+		inputLine = BitcoinExchange::split(fileContent, delimiter, splitSize);
+
+		try {
+			if (splitSize != 2)
+				throw std::runtime_error(ERR_BAD_INPUT + fileContent);
+
+			date = BitcoinExchange::trimWhitespaces(inputLine[0]);
+			course = BitcoinExchange::trimWhitespaces(inputLine[1]);
+
+			if (!date.length() || !course.size()
+				|| !BitcoinExchange::isValidDate(date)
+				|| !BitcoinExchange::isValidAndInBoundsNumber(course, false))
+				throw std::runtime_error(ERR_BAD_INPUT + fileContent);
+
+			BitcoinExchange::calculateCourse(date, course);
+		} catch (const std::exception & exc) {
+			std::cout << "Error: " << exc.what() << std::endl;
+		}
+
+		std::getline(fileReader, fileContent);
+		delete[] inputLine;
+	}
+
+}
+
+void BitcoinExchange::calculateCourse( const std::string & date, const std::string & course ) {
+	db_map::iterator target;
+	db_map::iterator db_start = BitcoinExchange::DB_COURSES_MAP.begin();
+	db_map::iterator near_bound = BitcoinExchange::DB_COURSES_MAP.upper_bound(date);
+
+	target = near_bound;
+	if (near_bound != db_start)
+		target = --near_bound;
 	
+	const double result = std::strtod(course.c_str(), NULL) * target->second;
+
+	std::cout << date << " => " << course << " = " << result << std::endl;
 }
 
-bool BitcoinExchange::validCharacters(const std::string& line)
-{
-	size_t pos = 0;
-	size_t dash = 2;
-	size_t symb = 1;
-	while (42)
-	{
-		if ((pos = line.find(sym, pos)) == std::string::npos)
-			break;
-		symb--;
-		pos++;
+bool BitcoinExchange::isValidDate( const std::string & date ) {
+	std::string * datePart = NULL;
+	size_t splittedSize, i = 0;
+	int month;
+	int year;
+
+	datePart = BitcoinExchange::split(date, '-', splittedSize);
+	if (splittedSize != 3) {
+		delete[] datePart;
+		return (false);
 	}
-	std::string str = line.substr(0, line.find(BitcoinExchange::sym));
-	pos = 0;
-	while (42)
-	{
-		if ((pos = str.find('-', pos)) == std::string::npos)
-			break;
-		dash--;
-		pos++;
+	if (!datePart[i].length() || datePart[i].length() != 4
+		|| !BitcoinExchange::isOnlyDigit(datePart[i], false)) {
+		delete[] datePart;
+		return (false);
 	}
-	if (line.find(BitcoinExchange::sym, 0) == std::string::npos || line.find(BitcoinExchange::sym, 0) + 1 == line.size() \
-			|| symb != 0 || dash != 0)
-		{
-			if (BitcoinExchange::sym != '|')
-				err = _ERROR_INVALID_DATA_;
-			else
-			{
-				err = _ERROR_BAD_INPUT_;
-				err += line.substr(0, line.find('|', 0));
+	year = std::atoi(datePart[i].c_str());
+
+	i++;
+	if (datePart[i].length() == 2
+		&& BitcoinExchange::isOnlyDigit(datePart[i], false)) {
+			month = std::atoi(datePart[i].c_str());
+
+			if (month < 1 || month > 12) {
+				delete[] datePart;
+				return (false);
 			}
-			return false;
+		} else {
+			delete[] datePart;
+			return (false);
 		}
-	return true;
-}
 
-bool BitcoinExchange::validData(const std::string& str, std::map<int,int>& cal)
-{
-	size_t pos = 0;
-	std::string data = str.substr(0, str.find(BitcoinExchange::sym, 0));
-	pos = data.find('-', 0) + 1;
-	std::string year = data.substr(0, pos - 1);
-	std::string month = data.substr(pos, data.find('-', pos) - pos);
-	pos = data.find('-', pos) + 1;
-	std::string day = data.substr(pos, data.size() - pos);
-	if (BitcoinExchange::sym == '|')
-		day.resize(day.size() - 1);
-	if (year.size() != 4 || std::atoi(year.c_str()) < 2009 || std::atoi(year.c_str()) > 2022 \
-		|| !BitcoinExchange::is_all_num(year, 0))
-	{
-		err = _ERROR_INVALID_YEAR_;
-		err += " => [" + year + "]";
-		return false;
-	}
-	std::map<int,int>::const_iterator it = cal.begin();
-	for (; it != cal.end(); ++ it)
-		if (it->first == std::atoi(month.c_str()))
-			break;
-	if (it == cal.end() || month.size() != 2 || !BitcoinExchange::is_all_num(month, 0))
-	{
-		err = _ERROR_INVALID_MONTH_;
-		err += " => [" + month + "]";
-		return false;
-	}
-	if (!(std::atoi(year.c_str()) % 4))
-		cal[2] = 29;
-	else
-		cal[2] = 28;
-	if (it->second < std::atoi(day.c_str()) || std::atoi(day.c_str()) < 1 \
-				|| day.size() != 2 || !BitcoinExchange::is_all_num(day, 0))
-	{
-		err = _ERROR_INVALID_DAY_;
-		err += " => [" + day + "]";
-		return false;
-	}
-	return true;
-}
+	i++;
+	if (datePart[i].length() == 2
+		&& BitcoinExchange::isOnlyDigit(datePart[i], false)) {
+			int day = std::atoi(datePart[i].c_str());
+			int dayLimit = BitcoinExchange::MONTH_MAX_DAY[month - 1];
 
-bool BitcoinExchange::is_all_num(const std::string& coin, int flag)
-{
-	std::string::const_iterator it = coin.begin();
-	size_t dot = 0;
-	if (flag)
-	{
-		for (; it != coin.end(); ++ it)
-		{
-			if (*it == '.')
-				dot ++;
-			else if (*it < '0'|| *it > '9' || \
-				std::strtod(coin.c_str(), NULL) > 66063.56 || std::strtod(coin.c_str(), NULL) < 0)
-			{
-				err = _ERROR_INVALID_COIN_;
-				err += " => [" + coin + "]";
-				return false;
+			if (month == 2 && BitcoinExchange::isLeapYear(year))
+				dayLimit++;
+
+			if (day > dayLimit) {
+				delete[] datePart;
+				return (false);
 			}
+
+		} else {
+			delete[] datePart;
+			return (false);
 		}
-		if (dot > 1)
-		{
-			err = _ERROR_INVALID_COIN_;
-			err += " => [" + coin + "]";
-			return false;
-		}
-	}
-	else
-	{
-		for (; it != coin.end(); ++ it)
-			if (*it < '0'|| *it > '9')
-				return false;
-	}
-	return true;
+
+	delete[] datePart;
+	return (true);
 }
 
-/* VALIDATION DATA FILE*/
+std::string* BitcoinExchange::split(const std::string& str, char delimiter, size_t & size) {
+	size = 0;
 
-void BitcoinExchange::dbData(const std::string FileName)
-{
-	BitcoinExchange::sym = ',';
-	std::ifstream inFile(FileName.c_str());
-	if (!inFile.is_open())
-		throw mstd::ExpHandler(_ERROR_CAN_NOT_OPEN_FILE_);
-	std::string line;
-	getline(inFile, line);
-	if (line.empty())
-		throw mstd::ExpHandler(_ERROR_EMPTY_FILE_);
-	if (line != "date,exchange_rate")
-		throw mstd::ExpHandler(_ERROR_DATA_FORMAT_);
-	std::map<int, int> cal;
-	BitcoinExchange::creat_cal(cal);
-	while (getline(inFile, line))
-	{
-		if (!line.empty())
-		{
-			if (!BitcoinExchange::validCharacters(line) \
-				|| !BitcoinExchange::validData(line.substr(0,line.find(',',0)), cal) \
-				|| !BitcoinExchange::is_all_num(line.substr(line.find(',', 0) + 1, line.size()), 1))
-			{
-				BitcoinExchange::MAP.clear();
-				throw mstd::ExpHandler(err);
+	std::string token;
+	std::stringstream ss(str);
+
+	while (std::getline(ss, token, delimiter)) {
+		size++;
+	}
+
+	std::string * dividedList = new std::string[size];
+	size_t fillSize = 0;
+
+	ss.clear();
+	ss.seekg(0);
+
+	while (std::getline(ss, token, delimiter)) {
+		dividedList[fillSize] = token;
+		fillSize++;
+	}
+
+	return (dividedList);
+}
+
+std::string BitcoinExchange::trimWhitespaces( std::string & str ) {
+	std::string::iterator start = str.begin();
+	std::string::iterator end = str.end();
+
+	while (start != end && std::isspace(*start))
+		start++;
+
+	if (start == end)
+		return (std::string());
+
+	end--;
+
+	while (std::isspace(*end))
+		end--;
+
+	return std::string(start, end + 1);
+}
+
+bool BitcoinExchange::isOnlyDigit( const std::string & str, bool checkDot ) {
+	size_t idx = 0;
+	bool hasAlreadyDot = false;
+
+	if (str[idx] && (str[idx] == '+' || str[idx] == '-') && str[idx + 1])
+		idx++;
+
+	while (str[idx]) {
+		if (!std::isdigit(str[idx])) {
+			if (checkDot && !hasAlreadyDot
+				&& str[idx] == '.' && idx != 0
+				&& idx != str.length() - 1) {
+				hasAlreadyDot = true;
+				idx++;
+				continue ;
 			}
-			BitcoinExchange::key = line.substr(0, line.find(',',0));
-			BitcoinExchange::value = line.substr(line.find(',', 0) + 1, line.size());
-			BitcoinExchange::MAP[key] = std::strtod(line.substr(line.find(',',0) + 1, line.size()).c_str(), NULL);
+			return (false);
 		}
+		idx++;
 	}
-	if (BitcoinExchange::MAP.empty())
-		throw mstd::ExpHandler(_ERROR_EMPTY_FILE_);
-	// std::map<std::string,double>::iterator it = BitcoinExchange::MAP.begin();
-	// for (; it != BitcoinExchange::MAP.end(); ++ it)
-	// 	std::cout << it->first << "," << it->second << std::endl;
+
+	return (true);
 }
 
-
-/* VALIDATION INPUT FILE*/
-
-bool BitcoinExchange::validInputCoin(const std::string & str)
-{
-	if (str.empty())
-	{
-		err = _ERROR_INVALID_COIN_;
-		return false;
-	}
-	std::string::const_iterator it = str.begin();
-	if (*it == '-')
-	{
-		err = _ERROR_NEGATIVE_NUMBER_;
-		return false;
-	}
-	if (*it == '+')
-		++ it;
-	size_t dot = 0;
-	while (it != str.end())
-	{
-		if (*it == '.')
-			++ dot;
-		else if (*it < '0' || *it > '9')
-		{
-			err = _ERROR_INVALID_COIN_;
-			err += " => [" + str + "]";
-			return false;
-		}
-		++ it;
-	}
-	if (dot > 1)
-	{
-		err = _ERROR_INVALID_COIN_;
-		err += " => [" + str + "]";
-		return false;
-	}
-	if ((dot && std::atof(str.c_str()) > 1000.0) || (!dot && (str.size() > 4 || std::atoi(str.c_str()) > 1000)))
-	{
-		err = _ERROR_LARGE_NUMBER_;
-		return false;
-	}
-	return true;
+bool BitcoinExchange::isLeapYear( int year ) {
+	return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
 }
 
-void BitcoinExchange::validInput(const char * FileName)
-{
-	BitcoinExchange::sym = '|';
-	std::ifstream inFile(FileName);
-	if (!inFile.is_open())
-		throw mstd::ExpHandler(err = _ERROR_CAN_NOT_OPEN_FILE_);
-	std::string line;
-	getline(inFile, line);
-	if (line.empty())
-		throw mstd::ExpHandler(_ERROR_EMPTY_FILE_);
-	std::map<int, int> cal;
-	BitcoinExchange::creat_cal(cal);
-	while (getline(inFile, line))
-	{
-		if (!line.empty())
-		{
-			if (!BitcoinExchange::validCharacters(line) || !BitcoinExchange::validData(line, cal) \
-					|| !BitcoinExchange::validInputCoin(line.substr(line.find('|', 0) + 2, line.size())))
-				std::cerr << err << std::endl;
-			else
-			{
-				std::map<std::string, double>::iterator it = BitcoinExchange::MAP.upper_bound(line.substr(0, line.find(BitcoinExchange::sym, 0) - 1));
-				if (it != BitcoinExchange::MAP.begin())
-					-- it;
-				const double num = std::strtod(line.substr(line.find('|', 0) + 2, line.size()).c_str(), NULL);
-				std::cout << line.substr(0, line.find(BitcoinExchange::sym, 0) - 1);
-				std::cout << " => " << num << " = " << num * it->second << std::endl;
+bool BitcoinExchange::isValidAndInBoundsNumber( const std::string & source, bool isDBCol ) {
+	if (BitcoinExchange::isOnlyDigit(source, true)) {
+		double num = std::strtod(source.c_str(), NULL);
 
-			}
+		if (isDBCol && num >= 0) 
+			return (true);
+
+		if (!isDBCol) {
+			if (num >= BitcoinExchange::MIN_BOUND && num <= BitcoinExchange::MAX_BOUND)
+				return (true);
+			else if (num < BitcoinExchange::MIN_BOUND)
+				throw std::runtime_error(ERR_NEG_NUM);
+			else if (num > BitcoinExchange::MAX_BOUND)
+				throw std::runtime_error(ERR_LARGE_NUM);
 		}
 	}
-	BitcoinExchange::MAP.clear();
+	return (false);
 }
